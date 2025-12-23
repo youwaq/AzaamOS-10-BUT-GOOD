@@ -10,45 +10,41 @@
 
     <div id="setup-screen">
         <div class="setup-window">
-            <div class="setup-header">تثبيت AzaamOS 10</div>
-            <div class="setup-body">
-                <img src="https://img.icons8.com/color/96/000000/windows-10.png" />
-                <h2>مرحباً بك في AzaamOS</h2>
-                <p id="setup-status">جارٍ فحص الملفات...</p>
-                <div class="progress-container"><div id="progress-bar"></div></div>
-                <button id="start-install" onclick="runInstallation()" style="display:none;">تثبيت الآن</button>
-            </div>
+            <h2>مرحباً بك في AzaamOS 10</h2>
+            <p>الرجاء إدخال اسم المستخدم للبدء:</p>
+            <input type="text" id="username-input" placeholder="اسمك هنا...">
+            <div class="progress-container"><div id="progress-bar"></div></div>
+            <button id="install-btn" onclick="startSetup()">تثبيت الآن</button>
         </div>
     </div>
 
     <div id="desktop" style="display:none;">
         <div class="desktop-icons">
-            <div class="icon" onclick="openApp('files')"><img src="https://img.icons8.com/color/48/000000/folder-invoices.png"/><span>الملفات</span></div>
-            <div class="icon" onclick="openApp('browser')"><img src="https://img.icons8.com/color/48/000000/chrome.png"/><span>المتصفح</span></div>
-            <div class="icon" onclick="openApp('settings')"><img src="https://img.icons8.com/color/48/000000/settings.png"/><span>الإعدادات</span></div>
-            <div class="icon" onclick="openApp('notes')"><img src="https://img.icons8.com/color/48/000000/notepad.png"/><span>المفكرة</span></div>
-            <div class="icon" onclick="openApp('paint')"><img src="https://img.icons8.com/color/48/000000/paint-palette.png"/><span>الرسام</span></div>
+            <div class="icon" onclick="openApp('files')">📁<span>الملفات</span></div>
+            <div class="icon" onclick="openApp('settings')">⚙️<span>الاعدادات</span></div>
         </div>
 
+        <div id="window-layer"></div>
+
         <div id="start-menu">
-            <div class="start-side">⚙️ 👤 🌙</div>
-            <div class="start-list">
-                <div class="start-item">AzaamOS 10</div>
-                <hr>
-                <div class="start-item" onclick="openApp('browser')">المتصفح</div>
-                <div class="start-item" onclick="openApp('notes')">المفكرة</div>
+            <div class="start-header">مرحباً <span id="user-display"></span></div>
+            <div class="start-items">
+                <div onclick="openApp('browser')">🌐 المتصفح</div>
+                <div onclick="openApp('notes')">📝 المفكرة</div>
+                <div onclick="openApp('paint')">🎨 الرسام</div>
             </div>
         </div>
 
         <div id="taskbar">
-            <div class="start-btn" onclick="toggleStart()">
-                <img src="https://img.icons8.com/color/48/000000/windows-10.png" width="24"/>
+            <div class="start-btn" onclick="toggleStart()">🪟</div>
+            <div class="hotbar">
+                <div class="hotbar-icon" onclick="openApp('browser')">🌐</div>
+                <div class="hotbar-icon" onclick="openApp('files')">📁</div>
+                <div class="hotbar-icon" onclick="openApp('settings')">⚙️</div>
             </div>
-            <div id="clock">12:00 PM</div>
+            <div id="clock">12:00</div>
         </div>
     </div>
-
-    <div id="window-layer"></div>
 
     <script src="script.js"></script>
 </body>
