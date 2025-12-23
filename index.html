@@ -2,47 +2,52 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AzaamOS 10</title>
+    <title>AzaamOS 10 - Professional Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="boot-screen">
+        <img src="https://img.icons8.com/color/144/000000/windows-10.png">
+        <div class="spinner"></div>
+    </div>
 
-    <div id="setup-screen">
-        <div class="setup-window">
-            <h2>مرحباً بك في AzaamOS 10</h2>
-            <p>الرجاء إدخال اسم المستخدم للبدء:</p>
-            <input type="text" id="username-input" placeholder="اسمك هنا...">
-            <div class="progress-container"><div id="progress-bar"></div></div>
-            <button id="install-btn" onclick="startSetup()">تثبيت الآن</button>
+    <div id="setup-screen" style="display:none;">
+        <div class="setup-card">
+            <h1>AzaamOS 10</h1>
+            <p>مرحباً بك في نظامك الجديد، ادخل اسمك للإعداد:</p>
+            <input type="text" id="username" placeholder="اسم المستخدم...">
+            <button onclick="finishSetup()">استمرار</button>
         </div>
     </div>
 
     <div id="desktop" style="display:none;">
-        <div class="desktop-icons">
-            <div class="icon" onclick="openApp('files')">📁<span>الملفات</span></div>
-            <div class="icon" onclick="openApp('settings')">⚙️<span>الاعدادات</span></div>
+        <div class="desktop-grid">
+            <div class="app-icon" onclick="openApp('files')">📁<span>ملفاتي</span></div>
+            <div class="app-icon" onclick="openApp('browser')">🌐<span>متصفح عزام</span></div>
+            <div class="app-icon" onclick="openApp('settings')">⚙️<span>الإعدادات</span></div>
         </div>
 
-        <div id="window-layer"></div>
+        <div id="window-manager"></div>
+
+        <div class="taskbar">
+            <div class="start-trigger" onclick="toggleStart()">🪟</div>
+            <div class="hotbar">
+                <img src="https://img.icons8.com/color/48/000000/chrome.png" onclick="openApp('browser')">
+                <img src="https://img.icons8.com/color/48/000000/folder-invoices.png" onclick="openApp('files')">
+                <img src="https://img.icons8.com/color/48/000000/settings.png" onclick="openApp('settings')">
+            </div>
+            <div class="status-area">
+                <span id="clock">00:00</span>
+            </div>
+        </div>
 
         <div id="start-menu">
-            <div class="start-header">مرحباً <span id="user-display"></span></div>
-            <div class="start-items">
-                <div onclick="openApp('browser')">🌐 المتصفح</div>
-                <div onclick="openApp('notes')">📝 المفكرة</div>
-                <div onclick="openApp('paint')">🎨 الرسام</div>
+            <div class="user-profile">👤 <span id="display-name"></span></div>
+            <div class="start-links">
+                <button onclick="openApp('notes')">📝 المفكرة</button>
+                <button onclick="openApp('paint')">🎨 الرسام</button>
+                <button onclick="location.reload()">🔄 إعادة التشغيل</button>
             </div>
-        </div>
-
-        <div id="taskbar">
-            <div class="start-btn" onclick="toggleStart()">🪟</div>
-            <div class="hotbar">
-                <div class="hotbar-icon" onclick="openApp('browser')">🌐</div>
-                <div class="hotbar-icon" onclick="openApp('files')">📁</div>
-                <div class="hotbar-icon" onclick="openApp('settings')">⚙️</div>
-            </div>
-            <div id="clock">12:00</div>
         </div>
     </div>
 
