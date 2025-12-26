@@ -2,55 +2,759 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>AzaamOS 10 - Professional Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azaam OS 10 Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            user-select: none;
+        }
+
+        /* شاشة الترحيب */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            color: white;
+        }
+
+        #welcome-screen h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: fadeIn 1s;
+        }
+
+        #welcome-screen .version {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        #lang-select {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.5em;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+
+        #setup-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .setup-box {
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            color: #333;
+            min-width: 400px;
+        }
+
+        .setup-box h2 {
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+
+        .setup-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+        }
+
+        .setup-box button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .setup-box button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        /* سطح المكتب */
+        #desktop {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* شريط المهام */
+        #taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 9000;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.3);
+        }
+
+        #start-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 2em;
+            color: white;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        #start-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        #taskbar-apps {
+            display: flex;
+            gap: 5px;
+            margin-right: 20px;
+            flex: 1;
+        }
+
+        .taskbar-app {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+        }
+
+        .taskbar-app:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        #system-tray {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            color: white;
+            margin-right: 20px;
+        }
+
+        .tray-icon {
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s;
+        }
+
+        .tray-icon:hover {
+            transform: scale(1.2);
+        }
+
+        #clock {
+            font-size: 1.1em;
+            direction: ltr;
+        }
+
+        /* قائمة ابدأ */
+        #start-menu {
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            width: 600px;
+            height: 500px;
+            background: rgba(30, 30, 30, 0.98);
+            backdrop-filter: blur(30px);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            z-index: 9500;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        #start-menu.show {
+            display: flex;
+            animation: slideUp 0.3s;
+        }
+
+        .start-header {
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .start-header h3 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .start-header p {
+            opacity: 0.9;
+        }
+
+        .start-apps {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .start-app {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .start-app:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+
+        .start-app-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        /* النوافذ */
+        .window {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            min-width: 400px;
+            min-height: 300px;
+            z-index: 100;
+        }
+
+        .window.active {
+            display: flex;
+            z-index: 1000;
+        }
+
+        .window.maximized {
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh - 60px) !important;
+            border-radius: 0;
+        }
+
+        .window-titlebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .window-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .window-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .window-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .window-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        /* المتصفح */
+        .browser-toolbar {
+            background: white;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .browser-toolbar button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .browser-toolbar input {
+            flex: 1;
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .browser-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* مدير الملفات */
+        .files-toolbar {
+            background: white;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .files-toolbar button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .file-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .file-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .file-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        /* المفكرة */
+        .notepad-toolbar {
+            background: white;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .notepad-toolbar button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .notepad-textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 20px;
+            font-size: 1.1em;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            outline: none;
+        }
+
+        /* الآلة الحاسبة */
+        .calculator {
+            background: #222;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .calc-display {
+            background: #333;
+            color: white;
+            padding: 20px;
+            font-size: 2em;
+            text-align: left;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            min-height: 60px;
+            word-break: break-all;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: #555;
+        }
+
+        .calc-btn.operator {
+            background: #667eea;
+        }
+
+        .calc-btn.equals {
+            background: #764ba2;
+            grid-column: span 2;
+        }
+
+        /* الإعدادات */
+        .settings-menu {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .settings-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-item:hover {
+            background: #f9f9f9;
+        }
+
+        .settings-toggle {
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .settings-toggle.active {
+            background: #667eea;
+        }
+
+        .settings-toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: all 0.3s;
+        }
+
+        .settings-toggle.active::after {
+            right: 26px;
+        }
+
+        /* مشغل الموسيقى */
+        .music-player {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .album-art {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+        }
+
+        .music-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .music-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* اللعبة */
+        .game-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 30px auto;
+        }
+
+        .game-cell {
+            aspect-ratio: 1;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            font-size: 3em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .game-cell:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* الرسوم المتحركة */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* الثيم الداكن */
+        body.dark-theme {
+            background: #1a1a1a;
+        }
+
+        body.dark-theme #desktop {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-theme .window-content {
+            background: #2d2d2d;
+            color: white;
+        }
+
+        body.dark-theme .notepad-textarea {
+            background: #2d2d2d;
+            color: white;
+        }
+
+        /* الإشعارات */
+        #notifications {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: rgba(30, 30, 30, 0.95);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s;
+            min-width: 300px;
+        }
+    </style>
 </head>
 <body>
-    <div id="boot-screen">
-        <img src="https://img.icons8.com/color/144/000000/windows-10.png">
-        <div class="spinner"></div>
-    </div>
-
-    <div id="setup-screen" style="display:none;">
-        <div class="setup-card">
-            <h1>AzaamOS 10</h1>
-            <p>مرحباً بك في نظامك الجديد، ادخل اسمك للإعداد:</p>
-            <input type="text" id="username" placeholder="اسم المستخدم...">
-            <button onclick="finishSetup()">استمرار</button>
+    <!-- شاشة الترحيب -->
+    <div id="welcome-screen">
+        <h1>🚀 Azaam OS 10 Pro</h1>
+        <div class="version">Build 22H2.1000</div>
+        <p style="font-size: 1.2em;">مرحباً بك في نظام التشغيل الاحترافي</p>
+        <div id="lang-select">
+            <button class="lang-btn" onclick="selectLanguage('ar')">🇸🇦 العربية</button>
+            <button class="lang-btn" onclick="selectLanguage('en')">🇬🇧 English</button>
         </div>
     </div>
 
-    <div id="desktop" style="display:none;">
-        <div class="desktop-grid">
-            <div class="app-icon" onclick="openApp('files')">📁<span>ملفاتي</span></div>
-            <div class="app-icon" onclick="openApp('browser')">🌐<span>متصفح عزام</span></div>
-            <div class="app-icon" onclick="openApp('settings')">⚙️<span>الإعدادات</span></div>
+    <!-- شاشة الإعداد -->
+    <div id="setup-screen">
+        <div class="setup-box">
+            <h2>إنشاء حساب جديد</h2>
+            <input type="text" id="username-input" placeholder="أدخل اسم المستخدم">
+            <input type="password" id="password-input" placeholder="أدخل كلمة المرور (اختياري)">
+            <button onclick="completeSetup()">ابدأ الاستخدام 🚀</button>
+        </div>
+    </div>
+
+    <!-- سطح المكتب -->
+    <div id="desktop">
+        <!-- شريط المهام -->
+        <div id="taskbar">
+            <div id="start-btn" onclick="toggleStartMenu()">⊞</div>
+            <div id="taskbar-apps"></div>
+            <div id="system-tray">
+                <span class="tray-icon" onclick="toggleTheme()">🌙</span>
+                <span class="tray-icon" onclick="showNotification('مركز الإشعارات', 'لا توجد إشعارات جديدة')">🔔</span>
+                <span class="tray-icon" onclick="adjustVolume()">🔊</span>
+                <span id="clock"></span>
+            </div>
         </div>
 
-        <div id="window-manager"></div>
-
-        <div class="taskbar">
-            <div class="start-trigger" onclick="toggleStart()">🪟</div>
-            <div class="hotbar">
-                <img src="https://img.icons8.com/color/48/000000/chrome.png" onclick="openApp('browser')">
-                <img src="https://img.icons8.com/color/48/000000/folder-invoices.png" onclick="openApp('files')">
-                <img src="https://img.icons8.com/color/48/000000/settings.png" onclick="openApp('settings')">
-            </div>
-            <div class="status-area">
-                <span id="clock">00:00</span>
-            </div>
-        </div>
-
+        <!-- قائمة ابدأ -->
         <div id="start-menu">
-            <div class="user-profile">👤 <span id="display-name"></span></div>
-            <div class="start-links">
-                <button onclick="openApp('notes')">📝 المفكرة</button>
-                <button onclick="openApp('paint')">🎨 الرسام</button>
-                <button onclick="location.reload()">🔄 إعادة التشغيل</button>
+            <div class="start-header">
+                <h3 id="user-greeting">مرحباً</h3>
+                <p>Azaam OS 10 Pro</p>
             </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+            <div class="start-apps">
+                <div class="start-app" onclick="openApp('browser')">
+                    <div class="start-app-icon">🌐</div>
+                    <div>المتصفح</div>
+                </div>
+                <div class="start-app" onclick="openApp('files')">
+                    <div class="start-app-icon">📁</div>
+                    <div>الملفات</div>
+                </div>
+                <div class="start-app" onclick="openApp('notepad')">
+                    <div class="start-app-icon">📝</div>
+                    <div>المفكرة</div>
+                </div>
+                <div class="start-app" onclick="openApp('calculator')">
+                    <div class="start-app-icon">🔢</div>
+                    <div>الآلة الحاسبة</div>
+                </div>
+                <div class="start-app" onclick="openApp('music')">
+                    <div class="start-app-icon">🎵</div>
+                    <div>الموسيقى</div>
+                </div>
+                <div class="start-app" onclick="openApp('store')">
+                    <div class="start-app-icon">🛒</div>
+                    <div>المتجر</div>
+                </div>
+                <div class="start-app" onclick="openApp('game')">
+                    <div class="start-app-icon">🎮</div>
+                    <div>لعبة XO</div>
+                </div>
+                <div class="start-app" onclick="openApp('settings')">
+                    <div class="start-app-icon">⚙️</div>
+                    <div>الإعدادات</div>
+                </div>
+                <div class="start-app" onclick="openApp('taskmgr')">
+       
