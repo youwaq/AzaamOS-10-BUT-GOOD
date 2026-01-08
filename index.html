@@ -1,753 +1,398 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azaam OS 10</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
-            background: #000;
-            height: 100vh;
-        }
-
-        .screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            z-index: 10000;
-        }
-
-        .screen.active {
-            display: flex !important;
-        }
-
-        /* Boot */
-        #boot {
-            background: #000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .win-logo {
-            width: 88px;
-            height: 88px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 30px;
-        }
-
-        .win-logo div {
-            background: white;
-        }
-
-        .boot-dots {
-            display: flex;
-            gap: 8px;
-        }
-
-        .boot-dots div {
-            width: 12px;
-            height: 12px;
-            background: white;
-            border-radius: 50%;
-            animation: pulse 1.4s infinite ease-in-out;
-        }
-
-        .boot-dots div:nth-child(2) { animation-delay: 0.2s; }
-        .boot-dots div:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        /* Setup */
-        .setup {
-            background: linear-gradient(135deg, #0078d4, #0053a0);
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .setup-box {
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .setup-title {
-            color: white;
-            font-size: 38px;
-            font-weight: 300;
-            margin-bottom: 15px;
-        }
-
-        .setup-sub {
-            color: rgba(255,255,255,0.85);
-            font-size: 16px;
-            margin-bottom: 40px;
-        }
-
-        .setup-input {
-            width: 100%;
-            max-width: 380px;
-            padding: 16px;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 4px;
-            color: white;
-            font-size: 15px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .setup-input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .setup-btn {
-            padding: 14px 45px;
-            background: white;
-            color: #0078d4;
-            border: none;
-            border-radius: 4px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .setup-check {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-            color: white;
-        }
-
-        .setup-check input {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Login */
-        #login {
-            background: linear-gradient(135deg, #0078d4, #0053a0);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-avatar {
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            margin-bottom: 20px;
-            border: 3px solid rgba(255,255,255,0.4);
-        }
-
-        .login-name {
-            color: white;
-            font-size: 32px;
-            font-weight: 300;
-            margin-bottom: 25px;
-        }
-
-        .login-pass {
-            width: 320px;
-            max-width: 90vw;
-            padding: 14px 20px;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 4px;
-            color: white;
-            font-size: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-btn {
-            width: 55px;
-            height: 55px;
-            background: rgba(255,255,255,0.3);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 50%;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        /* Desktop */
-        #desktop {
-            height: calc(100vh - 40px);
-            background: linear-gradient(135deg, #0078d4, #0053a0);
-            display: none;
-            position: relative;
-        }
-
-        #desktop.active {
-            display: block !important;
-        }
-
-        #desktop.bg1 { background: linear-gradient(135deg, #667eea, #764ba2); }
-        #desktop.bg2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        #desktop.bg3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        #desktop.bg4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-
-        .watermark {
-            position: absolute;
-            bottom: 50px;
-            right: 20px;
-            color: rgba(255,255,255,0.6);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .icon {
-            width: 85px;
-            text-align: center;
-            position: absolute;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .icon:hover {
-            background: rgba(255,255,255,0.12);
-        }
-
-        .icon-img {
-            font-size: 42px;
-            margin-bottom: 6px;
-        }
-
-        .icon-label {
-            color: white;
-            font-size: 12px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
-
-        /* Window */
-        .window {
-            position: absolute;
-            background: white;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-            min-width: 450px;
-            min-height: 350px;
-            display: none;
-            flex-direction: column;
-            border: 1px solid rgba(0,0,0,0.2);
-        }
-
-        .window.active {
-            display: flex !important;
-        }
-
-        .titlebar {
-            background: white;
-            color: #333;
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #e0e0e0;
-            cursor: move;
-        }
-
-        .titlebar-btns button {
-            background: transparent;
-            border: none;
-            width: 46px;
-            height: 32px;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .titlebar-btns button:hover {
-            background: #e5e5e5;
-        }
-
-        .titlebar-btns button:last-child:hover {
-            background: #e81123;
-            color: white;
-        }
-
-        .win-content {
-            flex: 1;
-            padding: 20px;
-            overflow: auto;
-        }
-
-        /* Taskbar */
-        #taskbar {
-            height: 40px;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-
-        .taskbar-left {
-            display: flex;
-            gap: 4px;
-        }
-
-        .start-btn {
-            width: 48px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .start-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .task-icon {
-            width: 40px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .task-icon:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        #clock {
-            margin-left: auto;
-            color: white;
-            font-size: 12px;
-            padding: 0 12px;
-        }
-
-        /* Start Menu */
-        #start {
-            position: absolute;
-            bottom: 45px;
-            left: 0;
-            width: 500px;
-            max-width: 95vw;
-            height: 600px;
-            max-height: 85vh;
-            background: rgba(20,20,20,0.92);
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-        }
-
-        #start.active {
-            display: flex !important;
-        }
-
-        .start-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
-        .start-avatar {
-            width: 38px;
-            height: 38px;
-            background: #0078d4;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .start-name {
-            color: white;
-            font-size: 14px;
-        }
-
-        .start-apps {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .start-apps h4 {
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 12px;
-            font-size: 11px;
-        }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            margin-bottom: 20px;
-        }
-
-        .app {
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            gap: 6px;
-        }
-
-        .app:hover {
-            background: rgba(255,255,255,0.12);
-        }
-
-        .app-icon {
-            font-size: 30px;
-        }
-
-        .app-label {
-            font-size: 10px;
-            color: white;
-            text-align: center;
-        }
-
-        .start-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 4px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .power {
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px 12px;
-        }
-
-        .power:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* Browser */
-        .browser-bar {
-            display: flex;
-            gap: 8px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .browser-btn {
-            width: 32px;
-            height: 32px;
-            border: 1px solid #ccc;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .browser-url {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 12px;
-            font-family: 'Consolas', monospace;
-            resize: none;
-            font-size: 13px;
-        }
-
-        .file-list {
-            list-style: none;
-        }
-
-        .file {
-            padding: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 4px;
-        }
-
-        .file:hover {
-            background: #f0f0f0;
-        }
-
-        .settings-item {
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-
-        .settings-item:hover {
-            background: #e8e8e8;
-        }
-
-        .settings-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .settings-desc {
-            font-size: 13px;
-            color: #666;
-        }
-
-        .calc-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
-            background: #e0e0e0;
-        }
-
-        .calc-btn {
-            padding: 20px;
-            font-size: 17px;
-            border: none;
-            background: #f5f5f5;
-            cursor: pointer;
-        }
-
-        .calc-btn:hover {
-            background: #e8e8e8;
-        }
-
-        .calc-btn.op {
-            background: #e0e0e0;
-        }
-
-        .calc-display {
-            width: 100%;
-            padding: 20px;
-            font-size: 32px;
-            text-align: right;
-            border: none;
-            margin-bottom: 10px;
-            background: white;
-        }
-
-        canvas {
-            border: 1px solid #ddd;
-            cursor: crosshair;
-        }
-
-        .paint-bar {
-            display: flex;
-            gap: 8px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .color {
-            width: 32px;
-            height: 32px;
-            border: 2px solid #ccc;
-            cursor: pointer;
-        }
-
-        .color.active {
-            border-color: #0078d4;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-        }
-
-        .modal.active {
-            display: flex !important;
-        }
-
-        .modal-box {
-            background: white;
-            padding: 24px;
-            border-radius: 4px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin-bottom: 16px;
-        }
-
-        .modal-btns {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            padding: 8px 20px;
-            border: 1px solid #ccc;
-            background: white;
-            cursor: pointer;
-        }
-
-        .modal-btn.primary {
-            background: #0078d4;
-            color: white;
-            border-color: #0078d4;
-        }
-
-        @media (max-width: 768px) {
-            .window {
-                min-width: 95vw;
-                top: 5vh !important;
-                left: 2.5vw !important;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Boot -->
-    <div id="boot" class="screen active">
-        <div class="win-logo"><div></div><div></div><div></div><div></div></div>
-        <div class="boot-dots"><div></div><div></div><div></div></div>
-    </div>
-
-    <!-- Setup -->
-    <div id="setup" class="screen setup">
-        <div class="setup-box">
-            <div class="win-logo"><div></div><div></div><div></div><div></div></div>
-            <div class="setup-title">مرحباً بك في Azaam OS 10</div>
-            <div class="setup-sub">لنبدأ بإعداد حسابك</div>
-            <input type="text" id="user" class="setup-input" placeholder="اسم المستخدم">
-            <div class="setup-check">
-                <input type="checkbox" id="usepass">
-                <label>إضافة كلمة مرور</label>
+import React, { useState, useEffect } from 'react';
+import { Monitor, Wifi, Volume2, Battery, Search, Folder, Chrome, Mail, Calendar, Settings, Power, User, Minimize, Maximize, X, Image, Music, Film, FileText, Globe, ChevronRight } from 'lucide-react';
+
+export default function AzaamOS() {
+  const [bootStage, setBootStage] = useState('loading'); // loading, setup, desktop
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [setupStep, setSetupStep] = useState(0);
+  const [userName, setUserName] = useState('');
+  const [time, setTime] = useState(new Date());
+  const [startMenu, setStartMenu] = useState(false);
+  const [windows, setWindows] = useState([]);
+  const [activeWindow, setActiveWindow] = useState(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Loading progress
+  useEffect(() => {
+    if (bootStage === 'loading') {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => setBootStage('setup'), 500);
+            return 100;
+          }
+          return prev + 2;
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [bootStage]);
+
+  const apps = [
+    { name: 'مستكشف الملفات', icon: Folder, color: 'bg-yellow-500' },
+    { name: 'المتصفح', icon: Chrome, color: 'bg-blue-500' },
+    { name: 'البريد', icon: Mail, color: 'bg-indigo-500' },
+    { name: 'التقويم', icon: Calendar, color: 'bg-red-500' },
+    { name: 'الصور', icon: Image, color: 'bg-purple-500' },
+    { name: 'الموسيقى', icon: Music, color: 'bg-pink-500' },
+    { name: 'الفيديو', icon: Film, color: 'bg-orange-500' },
+    { name: 'المستندات', icon: FileText, color: 'bg-green-500' },
+    { name: 'الإعدادات', icon: Settings, color: 'bg-gray-500' },
+  ];
+
+  const openWindow = (app) => {
+    const newWindow = {
+      id: Date.now(),
+      app: app,
+      minimized: false,
+      maximized: false,
+      position: { x: 100 + windows.length * 30, y: 50 + windows.length * 30 }
+    };
+    setWindows([...windows, newWindow]);
+    setActiveWindow(newWindow.id);
+    setStartMenu(false);
+  };
+
+  const closeWindow = (id) => {
+    setWindows(windows.filter(w => w.id !== id));
+    if (activeWindow === id) setActiveWindow(null);
+  };
+
+  const minimizeWindow = (id) => {
+    setWindows(windows.map(w => w.id === id ? { ...w, minimized: true } : w));
+  };
+
+  const maximizeWindow = (id) => {
+    setWindows(windows.map(w => w.id === id ? { ...w, maximized: !w.maximized } : w));
+  };
+
+  const restoreWindow = (id) => {
+    setWindows(windows.map(w => w.id === id ? { ...w, minimized: false } : w));
+    setActiveWindow(id);
+  };
+
+  const completeSetup = () => {
+    setBootStage('desktop');
+  };
+
+  // Loading Screen
+  if (bootStage === 'loading') {
+    return (
+      <div className="h-screen w-full bg-gradient-to-br from-blue-700 to-blue-900 flex flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="mb-12">
+            <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl">
+              <div className="grid grid-cols-2 gap-2 w-16 h-16">
+                <div className="bg-white rounded-lg"></div>
+                <div className="bg-white rounded-lg"></div>
+                <div className="bg-white rounded-lg"></div>
+                <div className="bg-white rounded-lg"></div>
+              </div>
             </div>
-            <input type="password" id="pass" class="setup-input" placeholder="كلمة المرور" style="display:none;">
-            <button class="setup-btn" onclick="finishSetup()">إنهاء الإعداد</button>
-        </div>
-    </div>
+            <h1 className="text-5xl font-bold text-white mb-2">Azaam OS 10</h1>
+            <p className="text-blue-200 text-xl">نظام التشغيل الاحترافي</p>
+          </div>
 
-    <!-- Login -->
-    <div id="login" class="screen">
-        <div class="login-avatar">👤</div>
-        <div class="login-name" id="login-user">مستخدم</div>
-        <input type="password" id="login-pass" class="login-pass" placeholder="كلمة المرور" style="display:none;">
-        <button class="login-btn" onclick="doLogin()">→</button>
-    </div>
+          <div className="w-80 mx-auto">
+            <div className="h-2 bg-blue-800/50 rounded-full overflow-hidden mb-4">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-300 rounded-full"
+                style={{ width: `${loadingProgress}%` }}
+              ></div>
+            </div>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+            <p className="text-white mt-4 text-lg">جاري التحميل... {loadingProgress}%</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    <!-- Desktop -->
-    <div id="desktop">
-        <div class="watermark">Azaam OS 10 Pro<br>Build 22H2<br>© 2025 Azaam</div>
-        
-        <div class="icon" style="top:20px;right:20px;" onclick="openWin('notepad')">
-            <div class="icon-img">📝</div>
-            <div class="icon-label">المفكرة</div>
-        </div>
-        <div class="icon" style="top:110px;right:20px;" onclick="openWin('files')">
-            <div class="icon-img">📁</div>
-            <div class="icon-label">الملفات</div>
-        </div>
-        <div class="icon" style="top:200px;right:20px;" onclick="openWin('browser')">
-            <div class="icon-img">🌐</div>
-            <div class="icon-label">المتصفح</div>
-        </div>
-        <div class="icon" style="top:290px;right:20px;" onclick="openWin('settings')">
-            <div class="icon-img">⚙️</div>
-            <div class="icon-label">الإعدادات</div>
-        </div>
+  // Setup Screen
+  if (bootStage === 'setup') {
+    return (
+      <div className="h-screen w-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center" dir="rtl">
+        <div className="w-full max-w-2xl p-8">
+          {setupStep === 0 && (
+            <div className="text-center animate-fade-in">
+              <div className="mb-8">
+                <Globe className="w-20 h-20 text-white mx-auto mb-6" />
+                <h2 className="text-4xl font-bold text-white mb-4">مرحباً بك في Azaam OS 10</h2>
+                <p className="text-blue-100 text-xl">دعنا نقوم بإعداد جهازك في بضع خطوات بسيطة</p>
+              </div>
+              <button
+                onClick={() => setSetupStep(1)}
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-colors shadow-xl flex items-center mx-auto space-x-reverse space-x-2"
+              >
+                <span>ابدأ الإعداد</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
 
-        <!-- Notepad -->
-        <div id="notepad" class="window" style="top:80px;left:120px;width:650px;height:480px;">
-            <div class="titlebar">
-                <span>المفكرة</span>
-                <div class="titlebar-btns">
-                    <button onclick="closeWin('notepad')">✕</button>
+          {setupStep === 1 && (
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 animate-fade-in">
+              <h2 className="text-3xl font-bold text-white mb-6 text-center">اختر اللغة</h2>
+              <div className="space-y-3 mb-8">
+                <button className="w-full bg-blue-500 text-white p-4 rounded-lg font-bold text-lg hover:bg-blue-600 transition-colors flex items-center justify-between">
+                  <span>العربية (موصى به)</span>
+                  <div className="w-5 h-5 bg-white rounded-full"></div>
+                </button>
+                <button className="w-full bg-white/20 text-white p-4 rounded-lg font-bold text-lg hover:bg-white/30 transition-colors">
+                  English
+                </button>
+                <button className="w-full bg-white/20 text-white p-4 rounded-lg font-bold text-lg hover:bg-white/30 transition-colors">
+                  Français
+                </button>
+              </div>
+              <button
+                onClick={() => setSetupStep(2)}
+                className="w-full bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors flex items-center justify-center space-x-reverse space-x-2"
+              >
+                <span>التالي</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {setupStep === 2 && (
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 animate-fade-in">
+              <h2 className="text-3xl font-bold text-white mb-6 text-center">قم بإنشاء حسابك</h2>
+              <div className="mb-8">
+                <label className="text-white text-lg mb-3 block">ما هو اسمك؟</label>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="اكتب اسمك هنا"
+                  className="w-full p-4 rounded-lg text-lg text-right bg-white/90 focus:bg-white outline-none focus:ring-4 focus:ring-blue-300 transition-all"
+                />
+              </div>
+              <button
+                onClick={() => setSetupStep(3)}
+                disabled={!userName.trim()}
+                className="w-full bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors flex items-center justify-center space-x-reverse space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>التالي</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {setupStep === 3 && (
+            <div className="text-center animate-fade-in">
+              <div className="mb-8">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+                  <div className="text-5xl">✓</div>
                 </div>
+                <h2 className="text-4xl font-bold text-white mb-4">كل شيء جاهز!</h2>
+                <p className="text-blue-100 text-xl mb-8">مرحباً {userName}، جهازك جاهز للاستخدام</p>
+              </div>
+              <button
+                onClick={completeSetup}
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-colors shadow-xl"
+              >
+                ابدأ استخدام Azaam OS 10
+              </button>
             </div>
-            <div class="win-content" style="padding:0;">
-                <textarea id="notetext" placeholder="ابدأ الكتابة..."></textarea>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop
+  return (
+    <div className="h-screen w-full bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 overflow-hidden relative">
+      {/* Desktop Icons */}
+      <div className="absolute top-4 right-4 space-y-4">
+        <DesktopIcon icon={Monitor} label="هذا الكمبيوتر" />
+        <DesktopIcon icon={Folder} label="المستندات" />
+        <DesktopIcon icon={Settings} label="الإعدادات" />
+      </div>
+
+      {/* Windows */}
+      {windows.map(window => !window.minimized && (
+        <Window
+          key={window.id}
+          window={window}
+          isActive={activeWindow === window.id}
+          onClose={() => closeWindow(window.id)}
+          onMinimize={() => minimizeWindow(window.id)}
+          onMaximize={() => maximizeWindow(window.id)}
+          onFocus={() => setActiveWindow(window.id)}
+        />
+      ))}
+
+      {/* Start Menu */}
+      {startMenu && (
+        <div className="absolute bottom-12 right-0 w-96 h-[500px] bg-gray-900/95 backdrop-blur-xl rounded-tl-lg shadow-2xl border border-gray-700" dir="rtl">
+          <div className="p-6">
+            <div className="flex items-center space-x-reverse space-x-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="text-white font-semibold">{userName || 'المستخدم'}</div>
+                <div className="text-gray-400 text-sm">المسؤول</div>
+              </div>
             </div>
+
+            <div className="mb-4">
+              <h3 className="text-gray-400 text-xs font-semibold mb-3">مثبت</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {apps.map((app, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => openWindow(app)}
+                    className="flex flex-col items-center p-3 hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <div className={`w-12 h-12 ${app.color} rounded-lg flex items-center justify-center mb-2`}>
+                      <app.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-white text-xs text-center">{app.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gray-800/50 border-t border-gray-700">
+            <button className="w-full flex items-center justify-end space-x-reverse space-x-3 p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <span className="text-white">إيقاف التشغيل</span>
+              <Power className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Taskbar */}
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gray-900/80 backdrop-blur-xl border-t border-gray-700/50 flex items-center px-2">
+        {/* System Tray - Left Side */}
+        <div className="flex items-center space-x-3 text-white">
+          <div className="text-sm">
+            <div>{time.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div className="text-xs text-gray-400">{time.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}</div>
+          </div>
+          <Battery className="w-4 h-4" />
+          <Volume2 className="w-4 h-4" />
+          <Wifi className="w-4 h-4" />
         </div>
 
-        <!-- Files -->
-        <div id="files" class="window" style="top:100px;left:180px;width:680px;height:520px;">
-            <div class="titlebar">
-                <span>مستكشف الملفات</span>
-                <div class="titlebar-btns">
-                    <button onclick="closeWin('files')">✕</button>
-                </div>
-            </div>
-            <div class="win-content">
-                <button style="padding:8px 16px;border:1px solid #ccc;background:white;cursor:pointer;margin-bottom:15px;" onclick="showModal('newfile')">+ ملف جديد</button>
-                <h3 style="color:#0078d4;margin-bottom:15px;">📁 المستندات</h3>
-                <ul class="file-list" id="filelist">
-                    <li class="file" onclick="openNote()"><span style="font-size:24px;">📄</span><span>مرحباً.txt</span></li>
-                    <li class="file"><span style="font-size:24px;">📁</span><span>الصور</span></li>
-                    <li class="file"><span style="font-size:24px;">📁</span><span>الموسيقى</span></li>
-                </ul>
-            </div>
+        {/* Open Windows */}
+        <div className="flex-1 flex items-center justify-center space-x-reverse space-x-1">
+          {windows.map(window => (
+            <button
+              key={window.id}
+              onClick={() => window.minimized ? restoreWindow(window.id) : setActiveWindow(window.id)}
+              className={`h-10 px-3 flex items-center space-x-reverse space-x-2 rounded transition-colors ${
+                activeWindow === window.id && !window.minimized ? 'bg-gray-700' : 'hover:bg-gray-700/50'
+              }`}
+            >
+              <span className="text-white text-sm">{window.app.name}</span>
+              <div className={`w-5 h-5 ${window.app.color} rounded flex items-center justify-center`}>
+                <window.app.icon className="w-3 h-3 text-white" />
+              </div>
+            </button>
+          ))}
         </div>
 
-        <!-- Browser -->
-        <div id="browser" class="window" style="top:70px;left:240px;width:850px;height:600px;">
-            <div class="titlebar">
-                <span>متصفح Azaam</span>
-                <div class="titlebar-btns">
-                    <button onclick="closeWin('browser')">✕</button>
-                </div>
+        {/* Search Bar */}
+        <div className="ml-2 w-64 h-8 bg-gray-800 rounded flex items-center px-3 space-x-2" dir="rtl">
+          <input
+            type="text"
+            placeholder="اكتب هنا للبحث"
+            className="bg-transparent text-white text-sm outline-none flex-1 text-right"
+          />
+          <Search className="w-4 h-4 text-gray-400" />
+        </div>
+
+        {/* Start Button - Right Side */}
+        <button
+          onClick={() => setStartMenu(!startMenu)}
+          className="mr-2 w-12 h-10 flex items-center justify-center hover:bg-gray-700/50 rounded transition-colors"
+        >
+          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+            <div className="grid grid-cols-2 gap-0.5 w-3 h-3">
+              <div className="bg-white rounded-sm"></div>
+              <div className="bg-white rounded-sm"></div>
+              <div className="bg-white rounded-sm"></div>
+              <div className="bg-white rounded-sm"></div>
             </div>
-            <div class="win-content" style="padding:0;">
-                <div class="browser-bar">
-                    <button class="browser-btn" onclick="browserBack()">←</button>
-                    <button class="browser-btn" onclick="browserHome()">🏠</button>
-                    <input type="text" class="browser-url" id="browserurl" placeholder="ابحث أو أدخل عنوان" value="azaam://home">
-                    <button class="browser-btn" onclick="browserGo()">→
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DesktopIcon({ icon: Icon, label }) {
+  return (
+    <button className="flex flex-col items-center space-y-1 p-2 hover:bg-white/10 rounded-lg transition-colors">
+      <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center">
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <span className="text-white text-xs text-center drop-shadow-lg">{label}</span>
+    </button>
+  );
+}
+
+function Window({ window, isActive, onClose, onMinimize, onMaximize, onFocus }) {
+  const Icon = window.app.icon;
+  const style = window.maximized
+    ? { top: 0, left: 0, right: 0, bottom: 48, width: '100%', height: 'calc(100% - 48px)' }
+    : { 
+        top: window.position.y, 
+        left: window.position.x, 
+        width: 700, 
+        height: 500 
+      };
+
+  return (
+    <div
+      onClick={onFocus}
+      className={`absolute bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col ${
+        isActive ? 'z-10' : 'z-0'
+      }`}
+      style={style}
+      dir="rtl"
+    >
+      {/* Title Bar */}
+      <div className={`h-10 ${window.app.color} flex items-center justify-between px-3`}>
+        <div className="flex items-center space-x-2">
+          <button onClick={onClose} className="w-8 h-8 hover:bg-red-600 rounded flex items-center justify-center transition-colors">
+            <X className="w-4 h-4 text-white" />
+          </button>
+          <button onClick={onMaximize} className="w-8 h-8 hover:bg-white/20 rounded flex items-center justify-center transition-colors">
+            <Maximize className="w-4 h-4 text-white" />
+          </button>
+          <button onClick={onMinimize} className="w-8 h-8 hover:bg-white/20 rounded flex items-center justify-center transition-colors">
+            <Minimize className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        <div className="flex items-center space-x-reverse space-x-2">
+          <span className="text-white text-sm font-medium">{window.app.name}</span>
+          <Icon className="w-4 h-4 text-white" />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 p-6 bg-gray-50">
+        <div className="text-center">
+          <Icon className="w-24 h-24 mx-auto text-gray-400 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">{window.app.name}</h2>
+          <p className="text-gray-600">هذه نافذة تجريبية لتطبيق {window.app.name}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
